@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+:root {
+  --color-jr-black: #0d0d0d;
+  --color-jr-panel: #171717;
+  --color-jr-offwhite: #f2f0ec;
+  --color-jr-red: #d81324;
+  --color-jr-red-bright: #ef1a2c;
+  --color-jr-red-deep: #7a0d16;
+  --color-jr-steel: #4a4a4c;
+  --color-jr-steel-light: #c9c9c9;
+  --color-jr-border: #ddd8cf;
+  --color-whatsapp-green: #25d366;
+  --color-whatsapp-green-dark: #1ebe5b;
+}
+
+@theme inline {
+  --color-jr-black: var(--color-jr-black);
+  --color-jr-panel: var(--color-jr-panel);
+  --color-jr-offwhite: var(--color-jr-offwhite);
+  --color-jr-red: var(--color-jr-red);
+  --color-jr-red-bright: var(--color-jr-red-bright);
+  --color-jr-red-deep: var(--color-jr-red-deep);
+  --color-jr-steel: var(--color-jr-steel);
+  --color-jr-steel-light: var(--color-jr-steel-light);
+  --color-jr-border: var(--color-jr-border);
+  --color-whatsapp-green: var(--color-whatsapp-green);
+  --color-whatsapp-green-dark: var(--color-whatsapp-green-dark);
+  --font-heading: var(--font-oswald);
+  --font-sans: var(--font-inter);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-jr-offwhite);
+  color: var(--color-jr-black);
+  font-family: var(--font-inter), sans-serif;
+}
+
+/* Cantos cortados (clip-path), reaproveitados do mockup em vários componentes */
+.clip-corner-sm {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%);
+}
+.clip-corner-md {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+}
+.clip-corner-lg {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+}
+.clip-diagonal-hero {
+  clip-path: polygon(38% 0, 100% 0, 100% 100%, 12% 100%);
+}
+.clip-map-panel {
+  clip-path: polygon(0 0, 100% 0, 100% 88%, 88% 100%, 0 100%);
+}
