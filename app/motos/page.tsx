@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { WhatsappFloat } from "../components/WhatsappFloat";
-import { MotoCard } from "../components/MotoCard";
+import { MotosFiltro } from "./MotosFiltro";
 import { getTodasMotos } from "@/lib/motos";
 
 export const metadata: Metadata = {
@@ -37,11 +37,7 @@ export default async function MotosPage() {
       <section className="bg-jr-black pb-24">
         <div className="mx-auto max-w-6xl px-6 sm:px-8">
           {motos.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6.5 sm:grid-cols-2 lg:grid-cols-3">
-              {motos.map((moto) => (
-                <MotoCard key={moto.id} moto={moto} />
-              ))}
-            </div>
+            <MotosFiltro motos={motos} />
           ) : (
             <p className="text-jr-steel-light">
               Nenhuma moto cadastrada no momento. Volte em breve!

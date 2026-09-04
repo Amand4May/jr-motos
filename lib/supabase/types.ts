@@ -3,6 +3,8 @@ export type MotoStatus = "disponivel" | "vendida";
 export type Moto = {
   id: string;
   titulo: string;
+  marca: string | null;
+  cor: string | null;
   ano: number;
   km: number | null;
   preco: number;

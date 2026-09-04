@@ -91,6 +91,8 @@ async function uploadFotos(admin: SupabaseClient<Database>, files: File[]) {
 
 function parseMotoFields(formData: FormData) {
   const titulo = String(formData.get("titulo") ?? "").trim();
+  const marca = String(formData.get("marca") ?? "").trim();
+  const cor = String(formData.get("cor") ?? "").trim();
   const ano = Number(formData.get("ano"));
   const kmRaw = String(formData.get("km") ?? "").trim();
   const preco = Number(formData.get("preco"));
@@ -98,6 +100,12 @@ function parseMotoFields(formData: FormData) {
 
   if (!titulo) {
     return { error: "Informe o título da moto (ex: Honda CG 160 Titan)." } as const;
+  }
+  if (!marca) {
+    return { error: "Informe a marca da moto." } as const;
+  }
+  if (!cor) {
+    return { error: "Informe a cor da moto." } as const;
   }
   if (!Number.isFinite(ano) || ano < 1950 || ano > new Date().getFullYear() + 1) {
     return { error: "Informe um ano válido." } as const;
@@ -114,7 +122,7 @@ function parseMotoFields(formData: FormData) {
   }
 
   return {
-    data: { titulo, ano, km, preco, descricao: descricao || null },
+    data: { titulo, marca, cor, ano, km, preco, descricao: descricao || null },
   } as const;
 }
 

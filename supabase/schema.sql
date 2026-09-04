@@ -3,6 +3,8 @@
 create table if not exists public.motos (
   id uuid primary key default gen_random_uuid(),
   titulo text not null,
+  marca text,
+  cor text,
   ano int not null,
   km int,
   preco numeric not null,

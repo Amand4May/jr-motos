@@ -10,3 +10,7 @@ export function formatKm(km: number | null) {
   if (km == null) return null;
   return `${km.toLocaleString("pt-BR")} km`;
 }
+
+export function formatMilhar(valor: number) {
+  return valor.toLocaleString("pt-BR");
+}

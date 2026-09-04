@@ -2,12 +2,40 @@
 
 import { useActionState, useState, type ChangeEvent, type ReactNode } from "react";
 import type { Moto } from "@/lib/supabase/types";
+import { formatMilhar } from "@/lib/format";
 import type { MotoFormState } from "../actions";
 
 const initialState: MotoFormState = {};
 
 const inputClass =
   "rounded-md border border-jr-border bg-white px-4 py-3.5 text-base text-jr-black outline-none focus:border-jr-red";
+
+const MARCAS = [
+  "Honda",
+  "Yamaha",
+  "Suzuki",
+  "Kawasaki",
+  "Dafra",
+  "Shineray",
+  "Haojue",
+  "Bajaj",
+  "Traxx",
+  "BMW",
+  "Harley-Davidson",
+  "Royal Enfield",
+];
+
+const CORES = [
+  "Preto",
+  "Branco",
+  "Vermelho",
+  "Azul",
+  "Cinza",
+  "Prata",
+  "Verde",
+  "Amarelo",
+  "Laranja",
+];
 
 export function MotoForm({
   action,
@@ -37,6 +65,23 @@ export function MotoForm({
           className={inputClass}
         />
       </Campo>
+
+      <div className="grid grid-cols-2 gap-4">
+        <CampoComOutra
+          name="marca"
+          label="Marca"
+          opcoes={MARCAS}
+          defaultValue={moto?.marca ?? null}
+          required
+        />
+        <CampoComOutra
+          name="cor"
+          label="Cor"
+          opcoes={CORES}
+          defaultValue={moto?.cor ?? null}
+          required
+        />
+      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <Campo label="Ano">
@@ -82,11 +127,14 @@ export function MotoForm({
           type="file"
           accept="image/*"
           multiple
-          capture="environment"
           required={!moto}
           onChange={handleFotosChange}
           className="text-sm text-jr-black file:clip-corner-sm file:mr-4 file:border-0 file:bg-jr-red file:px-5 file:py-3 file:font-heading file:text-sm file:font-semibold file:text-jr-offwhite"
         />
+        <span className="text-xs text-jr-steel">
+          Toque em &quot;Escolher arquivos&quot; para tirar uma foto na hora ou escolher fotos já
+          salvas no celular.
+        </span>
       </Campo>
 
       {(moto?.fotos.length || previews.length > 0) && (
@@ -131,10 +179,6 @@ function Campo({ label, children }: { label: string; children: ReactNode }) {
       {children}
     </label>
   );
-}
-
-function formatMilhar(valor: number) {
-  return valor.toLocaleString("pt-BR");
 }
 
 function CampoNumero({
@@ -188,5 +232,55 @@ function CampoNumero({
       </div>
       <input type="hidden" name={name} value={raw} />
     </label>
+  );
+}
+
+function CampoComOutra({
+  name,
+  label,
+  opcoes,
+  defaultValue,
+  required,
+}: {
+  name: string;
+  label: string;
+  opcoes: string[];
+  defaultValue: string | null;
+  required?: boolean;
+}) {
+  const valorInicialConhecido = defaultValue && opcoes.includes(defaultValue);
+  const [selecionado, setSelecionado] = useState(
+    defaultValue ? (valorInicialConhecido ? defaultValue : "outra") : ""
+  );
+
+  return (
+    <Campo label={label}>
+      <select
+        value={selecionado}
+        onChange={(e) => setSelecionado(e.target.value)}
+        required={required}
+        name={selecionado === "outra" ? undefined : name}
+        className={inputClass}
+      >
+        <option value="" disabled>
+          Selecione
+        </option>
+        {opcoes.map((opcao) => (
+          <option key={opcao} value={opcao}>
+            {opcao}
+          </option>
+        ))}
+        <option value="outra">Outra</option>
+      </select>
+      {selecionado === "outra" && (
+        <input
+          name={name}
+          defaultValue={valorInicialConhecido ? "" : (defaultValue ?? "")}
+          required={required}
+          placeholder={`Digite a ${label.toLowerCase()}`}
+          className={`${inputClass} mt-2`}
+        />
+      )}
+    </Campo>
   );
 }
