@@ -37,8 +37,9 @@ export function MotoCard({ moto }: { moto: Moto }) {
       <div className="px-5.5 pb-6 pt-5.5">
         <h3 className="mb-1 font-heading text-xl font-semibold text-jr-offwhite">{moto.titulo}</h3>
         <div className="mb-3.5 text-sm text-jr-steel-light">
-          {moto.ano}
-          {formatKm(moto.km) ? ` · ${formatKm(moto.km)}` : ""}
+          {[moto.marca, moto.cor, String(moto.ano), formatKm(moto.km)]
+            .filter(Boolean)
+            .join(" · ")}
         </div>
         <div className="mb-4.5 font-heading text-2xl font-semibold text-jr-offwhite">
           {formatPreco(moto.preco)}
