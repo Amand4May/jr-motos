@@ -2,8 +2,9 @@
 
 import { useActionState, useState, type ChangeEvent, type ReactNode } from "react";
 import type { Moto } from "@/lib/supabase/types";
+import { supabase } from "@/lib/supabase/client";
 import { formatMilhar } from "@/lib/format";
-import type { MotoFormState } from "../actions";
+import { criarUploadAssinado, type MotoFormState } from "../actions";
 
 const initialState: MotoFormState = {};
 
@@ -47,11 +48,44 @@ export function MotoForm({
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
-  const [previews, setPreviews] = useState<string[]>([]);
+  const [fotos, setFotos] = useState<string[]>(moto?.fotos ?? []);
+  const [enviando, setEnviando] = useState(false);
+  const [erroUpload, setErroUpload] = useState<string | null>(null);
 
-  function handleFotosChange(e: ChangeEvent<HTMLInputElement>) {
+  async function handleFotosChange(e: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
-    setPreviews(files.map((file) => URL.createObjectURL(file)));
+    if (files.length === 0) return;
+
+    setEnviando(true);
+    setErroUpload(null);
+
+    for (const file of files) {
+      const resultado = await criarUploadAssinado(file.name);
+      if ("error" in resultado) {
+        setErroUpload(resultado.error);
+        continue;
+      }
+
+      const { error } = await supabase.storage
+        .from("motos")
+        .uploadToSignedUrl(resultado.path, resultado.token, file, {
+          contentType: file.type || "image/jpeg",
+        });
+      if (error) {
+        setErroUpload(`Falha ao enviar "${file.name}": ${error.message}`);
+        continue;
+      }
+
+      const { data } = supabase.storage.from("motos").getPublicUrl(resultado.path);
+      setFotos((prev) => [...prev, data.publicUrl]);
+    }
+
+    setEnviando(false);
+    e.target.value = "";
+  }
+
+  function removerFoto(url: string) {
+    setFotos((prev) => prev.filter((f) => f !== url));
   }
 
   return (
@@ -121,15 +155,14 @@ export function MotoForm({
         />
       </Campo>
 
-      <Campo label={moto ? "Adicionar mais fotos (opcional)" : "Fotos da moto"}>
+      <Campo label="Fotos da moto">
         <input
-          name="fotos"
           type="file"
           accept="image/*"
           multiple
-          required={!moto}
+          disabled={enviando}
           onChange={handleFotosChange}
-          className="text-sm text-jr-black file:clip-corner-sm file:mr-4 file:border-0 file:bg-jr-red file:px-5 file:py-3 file:font-heading file:text-sm file:font-semibold file:text-jr-offwhite"
+          className="text-sm text-jr-black file:clip-corner-sm file:mr-4 file:border-0 file:bg-jr-red file:px-5 file:py-3 file:font-heading file:text-sm file:font-semibold file:text-jr-offwhite disabled:opacity-60"
         />
         <span className="text-xs text-jr-steel">
           Toque em &quot;Escolher arquivos&quot; para tirar uma foto na hora ou escolher fotos já
@@ -137,21 +170,40 @@ export function MotoForm({
         </span>
       </Campo>
 
-      {(moto?.fotos.length || previews.length > 0) && (
-        <div className="flex flex-wrap gap-3">
-          {moto?.fotos.map((url) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={url} src={url} alt="" className="h-20 w-20 rounded object-cover" />
-          ))}
-          {previews.map((url) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={url}
-              src={url}
-              alt=""
-              className="h-20 w-20 rounded object-cover ring-2 ring-jr-red"
-            />
-          ))}
+      {enviando && <p className="text-sm text-jr-steel">Enviando foto(s)...</p>}
+
+      {erroUpload && (
+        <p className="rounded-md bg-jr-red/10 px-4 py-3 text-sm font-medium text-jr-red-bright">
+          {erroUpload}
+        </p>
+      )}
+
+      {fotos.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {fotos.length === 1 && (
+            <span className="text-xs text-jr-steel">
+              A moto precisa de pelo menos 1 foto — envie outra antes de remover essa.
+            </span>
+          )}
+          <div className="flex flex-wrap gap-3">
+            {fotos.map((url) => (
+              <div key={url} className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt="" className="h-20 w-20 rounded object-cover" />
+                {fotos.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removerFoto(url)}
+                    aria-label="Remover foto"
+                    className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-jr-red text-sm font-bold leading-none text-jr-offwhite shadow"
+                  >
+                    ×
+                  </button>
+                )}
+                <input type="hidden" name="fotos" value={url} />
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -163,7 +215,7 @@ export function MotoForm({
 
       <button
         type="submit"
-        disabled={pending}
+        disabled={pending || enviando}
         className="clip-corner-lg bg-jr-red py-4 font-heading text-lg font-semibold text-jr-offwhite transition-colors hover:bg-jr-red-bright disabled:opacity-60"
       >
         {pending ? "Salvando..." : submitLabel}
